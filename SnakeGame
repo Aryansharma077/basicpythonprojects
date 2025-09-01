@@ -1,0 +1,161 @@
+import pygame
+import random
+
+# Initialize pygame
+pygame.init()
+
+# Display settings
+WIDTH, HEIGHT = 600, 400
+BLOCK_SIZE = 20
+INITIAL_SPEED = 10
+
+dis = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("🐍 DARK SNAKE: Rise of Venom")
+
+clock = pygame.time.Clock()
+
+# Dark theme colors
+BLACK = (0, 0, 0)
+DARK_RED = (80, 0, 0)
+NEON_GREEN = (0, 255, 0)
+DEEP_PURPLE = (75, 0, 130)
+RED = (255, 0, 0)
+GLOW_GREEN = (0, 255, 120)
+SCORE_COLOR = (255, 50, 50)
+
+# Fonts (cool looking, with fallbacks)
+try:
+    font = pygame.font.SysFont("bauhaus 93", 26, bold=True)
+    score_font = pygame.font.SysFont("orbitron", 34, bold=True)
+except:
+    font = pygame.font.SysFont("segoeui", 26, bold=True)
+    score_font = pygame.font.SysFont("segoeui", 34, bold=True)
+
+
+def draw_dark_gradient():
+    """Draw a vertical black-to-dark-red gradient"""
+    for y in range(HEIGHT):
+        ratio = y / HEIGHT
+        r = int(BLACK[0] * (1 - ratio) + DARK_RED[0] * ratio)
+        g = int(BLACK[1] * (1 - ratio) + DARK_RED[1] * ratio)
+        b = int(BLACK[2] * (1 - ratio) + DARK_RED[2] * ratio)
+        pygame.draw.line(dis, (r, g, b), (0, y), (WIDTH, y))
+
+
+def draw_score(score):
+    value = score_font.render(f"Score: {score}", True, SCORE_COLOR)
+    dis.blit(value, [10, 10])
+
+
+def draw_snake(block_size, snake_body):
+    for i, segment in enumerate(snake_body):
+        center = (segment[0] + block_size // 2, segment[1] + block_size // 2)
+        if i == len(snake_body) - 1:
+            # Snake head with glow and red eyes
+            pygame.draw.circle(dis, GLOW_GREEN, center, block_size // 2 + 2)
+            pygame.draw.circle(dis, NEON_GREEN, center, block_size // 2)
+            pygame.draw.circle(dis, RED, (center[0] - 4, center[1] - 4), 2)
+            pygame.draw.circle(dis, RED, (center[0] + 4, center[1] - 4), 2)
+        else:
+            # Snake body
+            pygame.draw.circle(dis, DEEP_PURPLE, center, block_size // 2 - 1)
+
+
+def draw_message(msg, color, y_offset=0):
+    text = font.render(msg, True, color)
+    rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + y_offset))
+    dis.blit(text, rect)
+
+
+def game_loop():
+    game_over = False
+    game_close = False
+
+    x = WIDTH // 2
+    y = HEIGHT // 2
+    x_change = 0
+    y_change = 0
+
+    snake = []
+    snake_length = 1
+    speed = INITIAL_SPEED
+
+    food_x = round(random.randrange(0, WIDTH - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE
+    food_y = round(random.randrange(0, HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE
+
+    while not game_over:
+
+        while game_close:
+            draw_dark_gradient()
+            draw_message("You died... Press P to play again or Q to quit", RED)
+            draw_score(snake_length - 1)
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_over = True
+                        game_close = False
+                    elif event.key == pygame.K_p:
+                        game_loop()
+
+        # Handle input
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = True
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT and x_change == 0:
+                    x_change = -BLOCK_SIZE
+                    y_change = 0
+                elif event.key == pygame.K_RIGHT and x_change == 0:
+                    x_change = BLOCK_SIZE
+                    y_change = 0
+                elif event.key == pygame.K_UP and y_change == 0:
+                    x_change = 0
+                    y_change = -BLOCK_SIZE
+                elif event.key == pygame.K_DOWN and y_change == 0:
+                    x_change = 0
+                    y_change = BLOCK_SIZE
+
+        # Check boundary collision
+        if x >= WIDTH or x < 0 or y >= HEIGHT or y < 0:
+            game_close = True
+
+        x += x_change
+        y += y_change
+
+        draw_dark_gradient()
+        pygame.draw.rect(dis, RED, [food_x, food_y, BLOCK_SIZE, BLOCK_SIZE])
+
+        snake_head = [x, y]
+        snake.append(snake_head)
+        if len(snake) > snake_length:
+            del snake[0]
+
+        # Check self collision
+        for segment in snake[:-1]:
+            if segment == snake_head:
+                game_close = True
+
+        draw_snake(BLOCK_SIZE, snake)
+        draw_score(snake_length - 1)
+        pygame.display.update()
+
+        # Eating food
+        if x == food_x and y == food_y:
+            food_x = round(random.randrange(0, WIDTH - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE
+            food_y = round(random.randrange(0, HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE
+            snake_length += 1
+
+            # Increase speed every 3 foods
+            if snake_length % 3 == 0 and speed < 25:
+                speed += 1
+
+        clock.tick(speed)
+
+    pygame.quit()
+    quit()
+
+
+# Start the game
+game_loop()
