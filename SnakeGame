@@ -1,10 +1,8 @@
 import pygame
 import random
 
-# Initialize pygame
 pygame.init()
 
-# Display settings
 WIDTH, HEIGHT = 600, 400
 BLOCK_SIZE = 20
 INITIAL_SPEED = 10
@@ -14,7 +12,6 @@ pygame.display.set_caption("🐍 DARK SNAKE: Rise of Venom")
 
 clock = pygame.time.Clock()
 
-# Dark theme colors
 BLACK = (0, 0, 0)
 DARK_RED = (80, 0, 0)
 NEON_GREEN = (0, 255, 0)
@@ -23,7 +20,6 @@ RED = (255, 0, 0)
 GLOW_GREEN = (0, 255, 120)
 SCORE_COLOR = (255, 50, 50)
 
-# Fonts (cool looking, with fallbacks)
 try:
     font = pygame.font.SysFont("bauhaus 93", 26, bold=True)
     score_font = pygame.font.SysFont("orbitron", 34, bold=True)
@@ -51,13 +47,11 @@ def draw_snake(block_size, snake_body):
     for i, segment in enumerate(snake_body):
         center = (segment[0] + block_size // 2, segment[1] + block_size // 2)
         if i == len(snake_body) - 1:
-            # Snake head with glow and red eyes
             pygame.draw.circle(dis, GLOW_GREEN, center, block_size // 2 + 2)
             pygame.draw.circle(dis, NEON_GREEN, center, block_size // 2)
             pygame.draw.circle(dis, RED, (center[0] - 4, center[1] - 4), 2)
             pygame.draw.circle(dis, RED, (center[0] + 4, center[1] - 4), 2)
         else:
-            # Snake body
             pygame.draw.circle(dis, DEEP_PURPLE, center, block_size // 2 - 1)
 
 
