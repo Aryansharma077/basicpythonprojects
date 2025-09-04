@@ -92,8 +92,6 @@ def game_loop():
                         game_close = False
                     elif event.key == pygame.K_p:
                         game_loop()
-
-        # Handle input
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_over = True
@@ -135,13 +133,12 @@ def game_loop():
         draw_score(snake_length - 1)
         pygame.display.update()
 
-        # Eating food
+
         if x == food_x and y == food_y:
             food_x = round(random.randrange(0, WIDTH - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE
             food_y = round(random.randrange(0, HEIGHT - BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE
             snake_length += 1
 
-            # Increase speed every 3 foods
             if snake_length % 3 == 0 and speed < 25:
                 speed += 1
 
@@ -150,6 +147,4 @@ def game_loop():
     pygame.quit()
     quit()
 
-
-# Start the game
 game_loop()
